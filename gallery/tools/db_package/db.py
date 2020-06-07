@@ -67,28 +67,3 @@ def delete_user():
     if confirm == 'Yes':
         res = execute('delete from users where username=%s', (username,))
         print('\nDeleted.\n')
-
-def main():
-    connect()
-
-    while True:
-        print("1) List users")
-        print("2) Add user")
-        print("3) Edit user")
-        print("4) Delete user")
-        print("5) Quit")
-        command = input("Enter command> ")
-
-        if int(command) == 1:
-            list_users()
-        if int(command) == 2:
-            add_user()
-        if int(command) == 3:
-            edit_user()
-        if int(command) == 4:
-            delete_user()
-        if int(command) == 5:
-            break
-
-if __name__ == '__main__':
-    main()
