@@ -21,6 +21,7 @@ def main():
             if int(command) == 4:
                 db.delete_user()
             if int(command) == 5:
+                db.connection.close()
                 print()
                 break
         except ValueError as e:
