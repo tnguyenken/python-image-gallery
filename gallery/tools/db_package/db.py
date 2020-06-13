@@ -65,7 +65,12 @@ def edit_user():
         password = input('New password (press enter to keep current)> ')
         full_name = input('New full name (press enter to keep current)> ')
         print()
-        res = execute("update users set password=%s where username=%s", (password,username,))
+        if password and full_name is not None:
+            res = execute("update users set password=%s, full_name=%s where username=%s", (password,full_name,username,))
+        elif password == '':
+            res = execute("update users set full_name=%s where username=%s", (full_name,username,))
+        else:
+            res = execute("update users set password=%s  where username=%s", (password,username,))
 
 def delete_user():
     username = input('\nEnter username to delete> ')
