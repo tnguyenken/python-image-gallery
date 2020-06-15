@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+</head>
+<h1>Hi, welcome to Kenny's Nguyen's user admin webpage</h1>
+<p>Here you'll find a list of users currently administrable from our users table in the RDS instance</p>
+<body>
+    {% for user in users %}
+        <a href="/admin/modifyUser/{{ user }}">{{ user }}</a>
+        <form action="admin/deleteUser/{{ user }}" method="post">
+            <script>
+                function confirm_delete() {
+                    var retVal = confirm('Are you sure you want to delete this user?');
+                    if (retVal)
+                        return true;
+                    else
+                        return false;
+                }
+            </script>
+            <input type="submit" value="Delete {{ user }}" name="confirm" onclick="return confirm_delete();">
+        </form>
+        <br />
+    {% endfor %}
+</body>
+<body>
+    <a href="/admin/addUser">Create new user</a>
+</body>
+</html>
