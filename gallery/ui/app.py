@@ -1,5 +1,5 @@
 from flask import Flask, flash, request, render_template, redirect, url_for
-from db_package import db
+from .db_package import db
 import psycopg2
 
 app = Flask(__name__)

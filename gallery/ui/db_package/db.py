@@ -1,6 +1,6 @@
 import psycopg2
 import json
-from secrets import get_secret_postgres
+from gallery.ui.secrets import get_secret_postgres
 
 connection = None
 
