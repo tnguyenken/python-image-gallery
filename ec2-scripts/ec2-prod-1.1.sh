@@ -7,7 +7,7 @@ CONFIG_BUCKET="edu.au.cc.image-gallery-config1"
 sudo yum -y update
 sudo amazon-linux-extras install -y java-openjdk11
 sudo yum install -y git postgresql postgresql-devel gcc
-sudo yum install -y nano tree python3 java-11-openjdk-devel
+sudo yum install -y nano tree python3 python3-devel java-11-openjdk-devel
 sudo amazon-linux-extras install -y nginx1
 su ec2-user -l -c 'curl -s "https://get.sdkman.io" | bash && source .bashrc && sdk install gradle'
 
@@ -15,10 +15,10 @@ su ec2-user -l -c 'curl -s "https://get.sdkman.io" | bash && source .bashrc && s
 cd /home/ec2-user
 git clone https://github.com/tnguyenken/python-image-gallery.git
 chown -R ec2-user:ec2-user python-image-gallery
-su ec2-user -l -c "cd ~/python-image-gallery && pip3 install -r
+su ec2-user -l -c "cd ~/python-image-gallery && pip3 install -r requirements.txt --user"
 
-aws s3 cp s3://${CONFIG_BUCKET}/nginx/nginx.conf/etc/nginx
-aws s3 cp s3://${CONFIG_BUCKET}/default.d/image_gallery.conf/etc/nginx/default.d
+aws s3 cp s3://${CONFIG_BUCKET}/nginx/nginx.conf /etc/nginx/nginx.conf
+aws s3 cp s3://${CONFIG_BUCKET}/nginx/default.d/image_gallery.conf /etc/nginx/default.d/image_gallery.conf
 
 
 # Start/enable services
@@ -27,4 +27,4 @@ systemctl disable postfix
 systemctl start nginx
 systemctl enable nginx
 
-su ec2-user -l -c "cd ~/python-image-gallery && ./start" >/var/log/image_gallery.log 2>&l &
+su ec2-user -l -c 'cd ~/python-image-gallery && ./start' >/var/log/image_gallery.log 2>&1 &
