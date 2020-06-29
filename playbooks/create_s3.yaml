@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+    
+    bucket_name: edu.au.cc.image-gallery-config1
+    encryption: none
+    
+  tasks:
+    - name: Create s3 bucket
+      s3_bucket:
+        name: "{{ bucket_name }}"
+        encryption: "{{ encryption }}"
+        tags:
+          Module: 5
+        state: present
+      register: s3

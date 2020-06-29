@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    igw_route: 0.0.0.0/0
+    nat_route: 0.0.0.0/0
+
+    pub_rtb_name: pub-rtb-mod5
+    priv_rtb_name: priv-rtb-mod5
+
+  tasks:
+  
+    - name: Create public route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: "{{ pub_rtb_name }}"
+          Module: 5
+        subnets:
+          - "{{ public_subnet_1.subnet.id }}"
+          - "{{ public_subnet_2.subnet.id }}"
+        routes:
+          - dest: "{{ igw_route }}"
+            gateway_id: "{{ igw.gateway_id }}"
+        state: present
+
+    - name: Create private route table
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: "{{ priv_rtb_name }}"
+          Module: 5
+        subnets:
+          - "{{ private_subnet_1.subnet.id }}"
+          - "{{ private_subnet_2.subnet.id }}"
+        routes:
+          - dest: "{{ nat_route }}"
+            gateway_id: "{{ ig_nat.nat_gateway_id }}"

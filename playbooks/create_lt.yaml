@@ -1,0 +1,38 @@
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+    
+    region: us-east-1
+    
+    image_id: ami-09d95fab7fff3776c
+    instance_type: t2.micro
+    key_name: module5
+    
+    iam_instance_profile: image-gallery-server-role
+    ni_groups: ["{{ dev.group_id }}", "{{ pg_tag.group_id }}", "{{ sm_tag.group_id }}"]
+    
+    script: |
+        #!/usr/bin/bash
+    
+    
+        export IMAGE_GALLERY_BOOTSTRAP_VERSION="1.0"
+        aws s3 cp s3://edu.au.cc.image-gallery-config1/ec2-prod-latest.sh ./
+        /usr/bin/bash ec2-prod-latest.sh
+    
+  tasks:
+    - name: Create launch template
+      ec2_launch_template:
+        name: ig-lt-mod5
+        region: "{{ region }}"
+        image_id: "{{ image_id }}"
+        instance_type: "{{ instance_type }}"
+        key_name: "{{ key_name }}"
+        iam_instance_profile: "{{ iam_instance_profile }}"
+        network_interfaces: 
+          - associate_public_ip_address: yes
+            device_index: 0
+            groups: "{{ ni_groups }}"
+            subnet_id: "{{ public_subnet_1.subnet.id }}"
+        user_data: "{{ script | b64encode }}"
+      register: lt_template

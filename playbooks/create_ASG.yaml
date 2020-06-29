@@ -1,0 +1,31 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    lt_name: ig-lt-mod5
+    asg_instance_names: ig-asg-server
+    az1: us-east-1e
+    az2: us-east-1d
+    vpc_subnet_zones: ["{{ public_subnet_1.subnet.id }}", "{{ public_subnet_2.subnet.id }}"]
+    hc_type: ELB
+  
+  tasks:
+    - name: Create ASG
+      ec2_asg:
+        launch_template:
+          launch_template_name: "{{ lt_name }}"
+        name: "{{ asg_instance_names }}"
+        availability_zones: ["{{ az1 }}", "{{ az2 }}"]
+        vpc_zone_identifier: "{{ vpc_subnet_zones }}"
+        min_size: 1
+        max_size: 4
+        desired_capacity: 2
+        tags:
+          - Name: ig-asg-server
+        health_check_type: "{{ hc_type }}"
+        target_group_arns: ["{{ ig_tg.target_group_arn }}"]
+
+        # CURRENTLY HealthCheck for instances not working
+        wait_for_instances: no

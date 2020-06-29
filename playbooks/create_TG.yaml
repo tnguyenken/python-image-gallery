@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    region: us-east-1
+    
+    tg_name: ig-tg-mod5
+    check_port: 80
+    check_protocol: tcp
+  
+  tasks:
+    - name: Create ASG target group
+      elb_target_group:
+        name: "{{ tg_name }}"
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        port: "{{ check_port }}"
+        protocol: "{{ check_protocol }}"        
+        stickiness_type: source_ip
+        stickiness_enabled: no
+        state: present
+      register: ig_tg

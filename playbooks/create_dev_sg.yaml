@@ -1,0 +1,74 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    region: us-east-1
+
+    sg_dev: ig-development-mod5
+      
+    anywhere: 0.0.0.0/0
+    home: 113.22.128.213/32
+    dongji: 24.196.25.139/32
+    shaffer: 24.239.105.213/32
+    vpc_network: 10.5.0.0/16
+
+    sg_development:
+      rules:
+      # SSH
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "{{ anywhere }}"
+
+      # HTTP
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ home }}"
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ dongji }}"
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ shaffer }}"
+
+      # HTTPS
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: "{{ home }}"
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: "{{ dongji }}"
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: "{{ shaffer }}"
+
+      rules_egress:
+      # Allow all accepted connections to send outbound traffic anywhere
+      - proto: all
+        from_port: 0 
+        to_port: 0
+        cidr_ip: 0.0.0.0/0
+
+
+  tasks:
+    - name: Create ig-development security group
+      ec2_group:
+        description: ig-development
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_dev }}"
+        tags:
+          Name: devel
+          Module: 5
+        rules: "{{ sg_development['rules'] }}"
+        rules_egress: "{{ sg_development['rules_egress'] }}"
+        state: present
+      register: dev

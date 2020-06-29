@@ -1,0 +1,77 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+    
+    region: us-east-1
+    
+    anywhere: 0.0.0.0/0
+    home: 113.22.128.213/32
+    dongji: 24.196.25.139/32
+    shaffer: 24.239.105.213/32
+    vpc_network: 10.5.0.0/16
+
+    sg_sm_name: ig-secretsmanager-mod5
+    sg_sm_tag_name: ig-secretsmanager-tag-mod5    
+
+    sm_rules:
+      rules:
+        - proto: tcp
+          from_port: 443
+          to_port: 443
+          group_id: "{{ sm_tag_temp.group_id }}"
+      rules_egress:
+        - proto:
+          from_port:
+          to_port:
+    
+    sm_tag_rules:
+      rules:
+        - proto:
+          from_port:
+          to_port:
+      rules_egress:
+        - proto: tcp
+          from_port: 443
+          to_port: 443
+          group_id: "{{ sm.group_id }}"
+
+
+  tasks:
+    - name: Create ig-secretsmanager-tag security group
+      ec2_group:
+        description: access SM
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_sm_tag_name }}"
+        tags:
+          Name: secrets manager access
+          Module: 5
+        state: present
+      register: sm_tag_temp
+
+    - name: Create ig-secretsmanager security group
+      ec2_group:
+        description: ig-secretsmanager
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_sm_name }}"
+        tags:
+          Name: secrets manager access
+          Module: 5
+        rules: "{{ sm_rules['rules'] }}"
+        rules_egress: "{{ sm_rules['rules_egress'] }}"
+        state: present
+      register: sm
+
+    - name: Modify egress rules for ig-secretsmanager-tag
+      ec2_group:
+        description: access SM
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_sm_tag_name }}"
+        rules: "{{ sm_tag_rules['rules'] }}"
+        rules_egress: "{{ sm_tag_rules['rules_egress'] }}"
+        state: present
+      register: sm_tag

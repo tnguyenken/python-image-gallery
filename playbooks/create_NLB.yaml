@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    region: us-east-1
+    name: ig-nlb-mod5
+  
+  tasks:
+  - name: Destroy existing NLB
+    elb_network_lb:
+      name: "{{ name }}"
+      state: absent
+      
+  - name: Create network load balancer
+    elb_network_lb:
+      name: "{{ name }}"
+      region: "{{ region }}"
+      subnet_mappings:
+        - SubnetId: "{{ public_subnet_1.subnet.id }}"
+          AllocationId: "{{ eip_1.allocation_id }}"
+        - SubnetId: "{{ public_subnet_2.subnet.id }}"
+          AllocationId: "{{ eip_2.allocation_id }}"
+      listeners:
+        - Protocol: TCP
+          Port: 80
+          DefaultActions:
+            - Type: forward
+              TargetGroupName: "{{ ig_tg.target_group_name }}"
+      state: present
+    register: ig_nlb

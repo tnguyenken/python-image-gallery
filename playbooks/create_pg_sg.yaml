@@ -1,0 +1,77 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    region: us-east-1
+
+    anywhere: 0.0.0.0/0
+    home: 113.22.128.213/32
+    dongji: 24.196.25.139/32
+    shaffer: 24.239.105.213/32
+    vpc_network: 10.5.0.0/16
+
+    sg_postgres: ig-postgres-mod5
+    sg_postgres_tag: ig-postgres-tag-mod5
+    
+    pg_rules:
+      rules:
+        - proto: tcp
+          from_port: 5432
+          to_port: 5432
+          group_id: "{{ sg_pg_tag_temp.group_id }}"
+      rules_egress:
+        - proto:
+          from_port:
+          to_port:
+    
+    pg_tag_rules:
+      rules:
+        - proto:
+          from_port:
+          to_port:
+      rules_egress:
+        - proto: tcp
+          from_port: 5432
+          to_port: 5432
+          group_id: "{{ pg.group_id }}"
+  
+
+  tasks:
+    - name: Create ig-postgres-tag security group
+      ec2_group:
+        description: ig-postgres-tag
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_postgres_tag }}"
+        tags:
+          Name: postgres access
+          Module: 5
+        state: present
+      register: sg_pg_tag_temp
+
+    - name: Create ig-postgres security group
+      ec2_group:
+        description: ig-postgres
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_postgres }}"
+        tags:
+          Name: comms to RDS
+          Module: 5
+        rules: "{{ pg_rules['rules'] }}"
+        rules_egress: "{{ pg_rules['rules_egress'] }}"
+        state: present
+      register: pg
+
+    - name: Modify egress rules for postgres-tag
+      ec2_group:
+        description: ig-postgres-tag
+        region: "{{ region }}"
+        vpc_id: "{{ vpc.vpc.id }}"
+        name: "{{ sg_postgres_tag }}"
+        rules: "{{ pg_tag_rules['rules'] }}"
+        rules_egress: "{{ pg_tag_rules['rules_egress'] }}"
+        state: present
+      register: pg_tag

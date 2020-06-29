@@ -1,0 +1,25 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+    
+    gateway_name: ig-mod5-gateway
+    nat_name: priv-rtb-mod5
+
+  tasks:
+
+    - name: Create internet gateway
+      ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        tags:
+          Name: "{{ gateway_name }}"
+        state: present
+      register: igw
+
+    - name: Create NAT gateway
+      ec2_vpc_nat_gateway:
+        subnet_id: "{{ public_subnet_1.subnet.id }}"
+        if_exist_do_not_create: yes
+        state: present
+      register: ig_nat

@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    region: us-east-1
+  
+  tasks:
+  - name: Create eip for pub_subnet_1
+    ec2_eip:
+      region: "{{ region }}"
+      release_on_disassociation: yes
+    register: eip_1
+  
+  - name: Create eip for pub_subnet_2
+    ec2_eip:
+      region: "{{ region }}"
+      release_on_disassociation: yes
+    register: eip_2

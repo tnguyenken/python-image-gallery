@@ -1,0 +1,18 @@
+---
+- import_playbook: create_vpc.yaml
+- import_playbook: create_subnets.yaml
+- import_playbook: create_gateways.yaml
+- import_playbook: create_rtb.yaml
+- import_playbook: create_ACL.yaml
+- import_playbook: create_dev_sg.yaml
+- import_playbook: create_pg_sg.yaml
+- import_playbook: create_sm_sg.yaml
+- import_playbook: create_RDS.yaml
+- import_playbook: create_s3.yaml
+- import_playbook: create_lt.yaml
+- import_playbook: create_ec2.yaml
+- import_playbook: create_TG.yaml
+- import_playbook: create_EIP.yaml
+- import_playbook: create_NLB.yaml
+- import_playbook: create_ASG.yaml
+- import_playbook: create_r53.yaml

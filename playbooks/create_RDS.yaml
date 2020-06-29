@@ -1,0 +1,41 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+
+    region: us-east-1
+    db_engine: postgres
+    db_size: '20'
+    instance_name: image-gallery-mod5
+    instance_type: db.t2.micro
+    rds_sn_group: ig-private-dbgrp-mod5
+
+  tasks:
+    - name: Create RDS subnet group
+      rds_subnet_group:
+        region: "{{ region }}"
+        name: "{{ rds_sn_group }}"
+        description: RDS subnet group
+        subnets:
+          - "{{ private_subnet_1.subnet.id }}"
+          - "{{ private_subnet_2.subnet.id }}" 
+        state: present
+      
+    - name: Create private RDS instance
+      rds:
+        command: create
+        region: "{{ region }}"
+        db_engine: "{{ db_engine }}"
+        instance_name: "{{ instance_name }}"
+        instance_type: "{{ instance_type }}"
+        size: "{{ db_size }}"
+        multi_zone: no
+        port: 5432
+        publicly_accessible: no
+        subnet: "{{ rds_sn_group }}"
+        tags:
+          Module: 5
+        username: postgres
+        # ideally.. secrets manager would be used here
+        password: testingtesting
+        vpc_security_groups: "{{ pg.group_id }}"

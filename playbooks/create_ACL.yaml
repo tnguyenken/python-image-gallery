@@ -1,0 +1,85 @@
+---
+- hosts: localhost
+  gather_facts: no
+  
+  vars:
+  
+    anywhere: 0.0.0.0/0
+    home: 113.22.128.213/32
+    dongji: 24.196.25.139/32
+    shaffer: 24.239.105.213/32 
+    vpc_network: 10.5.0.0/16
+
+    pub_acl_name: ig-pub-acl-mod5
+    priv_acl_name: ig-priv-acl-mod5
+
+    pub_acl_rules:
+      ingress:          #inbound
+        # SSH
+        - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 22, 22]
+        
+        # HTTP
+        - [200, 'tcp', 'allow', "{{ home }}", null, null, 80, 80]
+        - [210, 'tcp', 'allow', "{{ dongji }}", null, null, 80, 80]
+        - [220, 'tcp', 'allow', "{{ shaffer }}", null, null, 80, 80]
+
+        # HTTPS
+        - [300, 'tcp', 'allow', "{{ home }}", null, null, 443, 443]
+        - [310, 'tcp', 'allow', "{{ dongji }}", null, null, 443, 443]
+        - [320, 'tcp', 'allow', "{{ shaffer }}", null, null, 443, 443]    
+
+        # RETURNING TRAFFIC
+        - [400, 'tcp', 'allow', "{{ anywhere }}", null, null, 1024, 65535]
+
+      egress:           #outbound
+        # HTTP
+        - [900, 'tcp', 'allow', "{{ anywhere }}", null, null, 80, 80]
+
+        # HTTPS
+        - [910, 'tcp', 'allow', "{{ anywhere }}", null, null, 443, 443]
+
+        # Returning outbound traffic
+        - [920, 'tcp', 'allow', "{{ anywhere }}", null, null, 1024, 65535]    
+
+    priv_acl_rules:
+      ingress:
+        # HTTPS
+        - [100, 'tcp', 'allow', "{{ vpc_network }}", null, null, 443, 443]
+        
+        # Returning traffic
+        - [200, 'tcp', 'allow', "{{ vpc_network }}", null, null, 1024, 65535]
+      egress:
+        # HTTPS
+        - [100, 'tcp', 'allow', "{{ vpc_network }}", null, null, 443, 443]
+        
+        # Returning traffic
+        - [200, 'tcp', 'allow', "{{ vpc_network }}", null, null, 1024, 65535]
+    
+  tasks:
+  - name: Create public network ACL
+    ec2_vpc_nacl:
+      vpc_id: "{{ vpc.vpc.id }}"
+      name: "{{ pub_acl_name }}"
+      tags:
+        Name: "{{ pub_acl_name }}"
+        Module: 5
+      subnets:
+        - "{{ public_subnet_1.subnet.id }}"
+        - "{{ public_subnet_2.subnet.id }}"
+      ingress: "{{ pub_acl_rules['ingress'] }}"
+      egress: "{{ pub_acl_rules['egress'] }}"
+      state: present
+
+  - name: Create private network ACL
+    ec2_vpc_nacl:
+      vpc_id: "{{ vpc.vpc.id }}"
+      name: "{{ priv_acl_name }}"
+      tags:
+        Name: "{{ priv_acl_name }}"
+        Module: 5
+      subnets:
+        - "{{ private_subnet_1.subnet.id }}"
+        - "{{ private_subnet_2.subnet.id }}" 
+      ingress: "{{ priv_acl_rules['ingress'] }}"
+      egress: "{{ priv_acl_rules['egress'] }}"
+      state: present
