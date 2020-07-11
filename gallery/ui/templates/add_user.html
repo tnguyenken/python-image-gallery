@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Modifying {{ user }}</h1>
+<h1>Add a new user</h1>
 
-<form action="/admin/modifyUser/{{ user }}" method="post" target="_blank">
+<form action="/admin/addUser" method="post">
+  <label for="username">Username:</label>
+  <input type="text" id="username" name="username"><br><br>
+
   <label for="password">Password:</label>
   <input type="text" id="password" name="password"><br><br>
+
   <label for="full_name">Full name:</label>
   <input type="text" id="full_name" name="full_name"><br><br>
+
   <input type="submit" value="Submit">
 </form>
 </body>

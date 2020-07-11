@@ -7,9 +7,9 @@ import base64
 from botocore.exceptions import ClientError
 
 
-def get_secret_postgres():
+def get_secret_flask_session():
 
-    secret_name = "sec-ig-imagegallery"
+    secret_name = "sec-ig-flask_session"
     region_name = "us-east-1"
 
     # Create a Secrets Manager client

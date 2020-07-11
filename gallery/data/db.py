@@ -1,8 +1,13 @@
 import psycopg2
 import json
-from gallery.ui.secrets import get_secret_postgres
+#from gallery.aws.secrets import get_secret_postgres
 
 connection = None
+
+"""
+In previous modules, we used a secrets manager to obtain the correct information to access our database.
+In module 6, we pass environment variables into a docker container to access our database. This part of our project
+has become code that is no longer used.
 
 def get_secret():
     jsonString = get_secret_postgres()
@@ -19,11 +24,18 @@ def get_username(secret):
 
 def get_dbname(secret):
     return secret['database_name']
+"""
 
 def connect():
     global connection
-    secret = get_secret()
-    connection = psycopg2.connect(host=get_host(secret), dbname=get_dbname(secret), user=get_username(secret), password=get_password(secret))
+    pg_host = 'mod6-ig-database.crpyrfmdbkk5.us-east-1.rds.amazonaws.com'
+    ig_database = 'image_gallery'
+    ig_user = 'image_gallery'
+    ig_passwd = 'simple'
+    # secret = get_secret()
+    # connection = psycopg2.connect(host=get_host(secret), dbname=get_dbname(secret), user=get_username(secret), password=get_password(secret))
+    # connection = psycopg2.connect(host=$PG_HOST, dbname=$IG_DATABASE, user=$IG_USER, password=$IG_PASSWD)
+    connection = psycopg2.connect(host=pg_host, dbname=ig_database, user=ig_user, password=ig_passwd)
     connection.set_session(autocommit=True)
 
 def execute(query, args=None):
