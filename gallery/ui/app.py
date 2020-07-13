@@ -16,9 +16,7 @@ s3 = boto3.resource('s3')
 app = Flask(__name__)
 app.secret_key = get_secret_flask_session()
 
-S3_IMAGE_BUCKET = 'edu.au.cc.image-gallery26'
-my_region = 'us-east-1'
-
+S3_IMAGE_BUCKET = 'edu.au.cc.image-gallery-config1'
 
 # Database connection
 connect()
@@ -53,18 +51,19 @@ def requires_user(view):
     return decorated
 
 
-def bucket_exists(users_bucket_name):
-    bucket = s3.Bucket(S3_IMAGE_BUCKET+'/'+users_bucket_name)
+def bucket_exists():
+    bucket = s3.Bucket(S3_IMAGE_BUCKET)
     exists = True
     try:
-        s3.meta.client.head_bucket(Bucket='mybucket')
+        s3.meta.client.head_bucket(Bucket=S3_IMAGE_BUCKET)
     except botocore.exceptions.ClientError as e:
         # If a client error is thrown, then check that it was a 404 error.
         # If it was a 404 error, then the bucket does not exist.
         error_code = e.response['Error']['Code']
         if error_code == '404':
             exists = False
-        
+    return exists
+
 @app.route('/')
 @requires_user
 def main_menu():
@@ -75,9 +74,9 @@ def main_menu():
 @app.route('/upload_file/<username>', methods=['GET', 'POST'])
 @requires_user
 def upload_images(username):
-    if bucket_exists(str(session['username'])) == False:
-        create_bucket(bucket_name=S3_IMAGE_BUCKET+'.'+str(session['username']), region=my_region)
-    upload_file(str(session['username']))
+    if bucket_exists() == False:
+        create_bucket(S3_IMAGE_BUCKET)
+    upload_file(S3_IMAGE_BUCKET, str(session['username']))
     return render_template('upload_form.html')
 
 @app.route('/invalidLogin')
@@ -95,14 +94,6 @@ def login():
             return redirect("/")
     else:
         return render_template('login.html')
-
-@app.route('/debugSession')
-def debugSession():
-    result = ""
-    for key,value in session.items():
-        result += key+"->"+str(value)+"<br />"
-    return result
-
 @app.route('/admin/executeAddUser')
 @requires_admin
 def execute_add_user(username, password, full_name):
